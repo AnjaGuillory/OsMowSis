@@ -4,25 +4,28 @@ public class Environment {
 	public int width, height;
 	protected Square[][] grid;
 	
-
+	// constructor
 	public Environment(int width_, int height_) {
 		width = width_;
 		height = height_;
 		grid = new Square[width][height];
 	}	
 	
+	// constructor
 	public Environment(int width_, int height_, Integer[] cratorsX, Integer[] cratorsY) {
 		width = width_;
 		height = height_;
 		grid = new Square[width][height];
 	}	
 	
+	// constructor
 	public Environment(int width_, int height_, Square[][] grid_) {
 		width = width_;
 		height = height_;
 		grid = grid_;
 	}
 	
+	// utility to set all values in the 2d array
 	public void SetAll(Square val) {
 		for (int h = height - 1; h >= 0; h--) {
 			for (int w = width - 1; w >= 0; w--) {
@@ -31,6 +34,7 @@ public class Environment {
 		}		
 	}
 	
+	// count the number of items of one type
 	public int CountOccurances(Square val) {
 		int count = 0;
 		for (int h = height - 1; h >= 0; h--) {
@@ -42,6 +46,7 @@ public class Environment {
 		return count;		
 	}
 	
+	// count the number of items in the local 3x3, center included
 	public int CountNearby(int x, int y, Square val) {
 		int count = 0;
 		for (int h = y - 1; h <= y+1; h++) {
@@ -53,10 +58,12 @@ public class Environment {
 		return count;		
 	}
 	
+	// unsafe getter
 	public Square GetIJ(int i, int j) {
 		return grid[i][j];
 	}
 	
+	// check if move would not intersect an obstacle or fence
 	public boolean IsMoveValid(int x, int y, int nSteps, Direction direction) {
 		
 		int dX = Utils.GetDirectionDeltaX(direction);
@@ -72,6 +79,7 @@ public class Environment {
 		return true;		
 	}
 	
+	// use a move to cut grass. update items in the 2d array
 	public void ApplyMove(int x, int y, int nSteps, Direction direction) {
 		
 		if (IsMoveValid(x, y, nSteps, direction) == false)
@@ -89,7 +97,7 @@ public class Environment {
 		}				
 	}
 	
-	
+	// safe query. if a x,y is outside, return fence.
 	public Square SafeQuery(int x, int y) {
 		if (x <0 || x>=width || y <0 || y>=height)
 			return Square.FENCE;
@@ -97,6 +105,7 @@ public class Environment {
 			return grid[x][y];
 	}
 
+	// safe setter of x,y point
 	public void SafeSet(int x, int y, Square square) {
 		if (x <0 || x>=width || y <0 || y>=height)
 			System.out.println("SAFE SET GOT ERROR");
@@ -104,6 +113,7 @@ public class Environment {
 			 grid[x][y] = square;
 	}
 	
+	// return scan around x,y
 	public Square[] GetScan(int x, int y) {
 		Square[] scan = new Square[8];
 		scan[0] = SafeQuery(x+0, y+1);
@@ -118,7 +128,7 @@ public class Environment {
 	}
 	
 	
-
+	// utility function to print the lawn
     public void Render(int[] mowerX, int[] mowerY) {
     	
         int i, j;
@@ -186,6 +196,7 @@ public class Environment {
 //        System.out.println("");
     }
     
+  // utility function
   private void renderHorizontalBar(int size) {
   System.out.print(" ");
   for (int k = 0; k < size; k++) {
