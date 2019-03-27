@@ -1,16 +1,9 @@
 
-public class State {
+public class TruthWithMower {
 
     public int truthX, truthY;
     public Direction direction;
-    
-
-//    public String trackAction;
-//    public Integer trackMoveDistance;
-//    public String trackNewDirection;
-//    public String trackMoveCheck;
-//    public String trackScanResults;
-    
+        
     public Action lastAction;
     public Move lastMove;
     public Square[] lastScan;
@@ -20,7 +13,7 @@ public class State {
     boolean crashed, stopped;
 
     
-    public State()
+    public TruthWithMower()
     {
         truthX = -1;
         truthY = -1;

@@ -1,4 +1,6 @@
 
+// helper class to hold an (x,y) pair
+// has a couple convenience functions in it
 public class MyPair {
 
 	int x, y;
@@ -7,27 +9,26 @@ public class MyPair {
 		y =y_;
 	}
 	
+	// return manhatten distance to another point. 
+	// NOTE, i think this function is antiquated. 
+	// we never care about manhatten distance since 
+	// we can travel diagonally
 	public int GetDistance(MyPair p) {
 		return Math.abs(x - p.x) + Math.abs(y - p.y);
 	}
 	
+	// return true IFF a square is in the neighboring 8 places
 	public boolean IsNeighbor(MyPair p) {
 		int dX = Math.abs(x - p.x); 
 		int dY = Math.abs(y - p.y);
-//		if (dX==0 && dY==1)
-//			return true;
-//		else if (dX==1 && dX==0)
-//			return true;
-//		else if (dX==1 && dY==1)
-//			return true;
-//		else
-//			return false;
 		if (dX>1 || dY>1)
 			return false;
 		else
 			return true;
 	}
 	
+	// returns the direction from this quare to the given square
+	// assumes that the two points are neighbors
 	public Direction GetDirectionTorwards(MyPair dest) {
 		Direction dir = Direction.NORTH; // default
 		

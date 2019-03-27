@@ -4,7 +4,7 @@ import java.io.*;
 
 public class SimDriver {
 
-    private State[] states;
+    private TruthWithMower[] truths;
     private Environment environ;
     boolean verbose;
     int startingGrassCount;
@@ -16,6 +16,8 @@ public class SimDriver {
     	nTurns = 0;
     }
 
+    // TODO this is left over from the non-puppy days. it needs to be updated
+    // read in the file and create the lawn, mowers, and puppies
     public void uploadStartingFile(String testFileName) {
         final String DELIMITER = ",";
         
@@ -45,19 +47,19 @@ public class SimDriver {
             // read in the lawnmower starting information
             tokens = takeCommand.nextLine().split(DELIMITER);
             int numMowers = Integer.parseInt(tokens[0]);
-            states = new State[numMowers];
+            truths = new TruthWithMower[numMowers];
             for (k = 0; k < numMowers; k++) {
                 tokens = takeCommand.nextLine().split(DELIMITER);
-                State state = new State();
-                state.truthX = Integer.parseInt(tokens[0]);
-                state.truthY = Integer.parseInt(tokens[1]);
-                state.direction = Utils.StringToDirection(tokens[2]);
-                states[k] = state;
+                TruthWithMower truth = new TruthWithMower();
+                truth.truthX = Integer.parseInt(tokens[0]);
+                truth.truthY = Integer.parseInt(tokens[1]);
+                truth.direction = Utils.StringToDirection(tokens[2]);
+                truths[k] = truth;
 //              IT DOESNT MAKE SENSE TO CUT THIS GRASS. THE SIM HASNT STARTED YET. AND ACCORDING TO THE RULES
 //              IF ALL WE DID WAS SCAN AND NOT MOVE, THEN THIS SHOULDNT GET CUT
 //                // mow the grass at the initial location
-//                if (lawnInfo[state.truthX][state.truthY] == Square.UNCUT)
-//                	lawnInfo[state.truthX][state.truthY] = Square.CUT;
+//                if (lawnInfo[truth.truthX][truth.truthY] == Square.UNCUT)
+//                	lawnInfo[truth.truthX][truth.truthY] = Square.CUT;
             }
 
             // read in the crater information
@@ -79,50 +81,54 @@ public class SimDriver {
         }
 	}
 
+    // check if each mower is stopped
 	public boolean AreAllStopped() {
 
-		for (int s = 0; s < states.length; s++) {
-			if (states[s].stopped == false)
+		for (int s = 0; s < truths.length; s++) {
+			if (truths[s].stopped == false)
 				return false;
 		}
 		return true;
 	}
 
+	// perform a single step of the simulation
 	public void Step() {
 
-		for (int s = 0; s < states.length; s++) {
-			State state = states[s];
-			Mower mower = state.mower;
+		for (int s = 0; s < truths.length; s++) {
+			TruthWithMower truth = truths[s];
+			Mower mower = truth.mower;
 			
-			if (state.stopped)
+			if (truth.stopped)
 				continue;
 			
-			state.lastAction = mower.GetNextAction();
-			switch (state.lastAction) {
+			truth.lastAction = mower.GetNextAction();
+			switch (truth.lastAction) {
 			case TURN_OFF:
-				state.stopped = true;
+				truth.stopped = true;
 				break;
 			case SCAN:
-				Square[] scan = environ.GetScan(state.truthX, state.truthY);
-				state.lastScan = scan;
+				Square[] scan = environ.GetScan(truth.truthX, truth.truthY);
+				truth.lastScan = scan;
 				mower.ReceiveScan(scan);
 				break;
 			case MOVE:
 				Move move = mower.DetermineMoveRequest();
-				boolean moveIsGood = environ.IsMoveValid(state.truthX, state.truthY, move.nSteps, state.direction);
+				boolean moveIsGood = environ.IsMoveValid(truth.truthX, truth.truthY, move.nSteps, truth.direction);
 				
+				// TODO HANDLE STALL LOGIC HERE
 				if (moveIsGood) {
-					environ.ApplyMove(state.truthX, state.truthY, move.nSteps, state.direction);
+					environ.ApplyMove(truth.truthX, truth.truthY, move.nSteps, truth.direction);
 					mower.ExecuteRequestedMove();
 				} else {
-					state.stopped = true;
-					state.crashed = true;
+					// we seem to have crashed
+					truth.stopped = true;
+					truth.crashed = true;
 					mower.Shutdown();
 				}
-				state.truthX += Utils.GetDirectionDeltaX(state.direction) * move.nSteps;
-				state.truthY += Utils.GetDirectionDeltaY(state.direction) * move.nSteps;
-				state.direction = move.direction;
-				state.lastMove = move;
+				truth.truthX += Utils.GetDirectionDeltaX(truth.direction) * move.nSteps;
+				truth.truthY += Utils.GetDirectionDeltaY(truth.direction) * move.nSteps;
+				truth.direction = move.direction;
+				truth.lastMove = move;
 				break;
 			default:
 				break;
@@ -134,15 +140,15 @@ public class SimDriver {
 
 	public void displayActionAndResponses() {
 
-		for (int s = 0; s < states.length; s++) {
-			State state = states[s];
-			Action lastAction = state.lastAction;
+		for (int s = 0; s < truths.length; s++) {
+			TruthWithMower truth = truths[s];
+			Action lastAction = truth.lastAction;
 			String trackAction = Utils.ActionToString(lastAction);
 			
 			// display the mower's actions
 			System.out.print(trackAction);
 			if (lastAction == Action.MOVE) {
-				System.out.println("," + state.lastMove.nSteps + "," + Utils.DirectionToString(state.lastMove.direction));
+				System.out.println("," + truth.lastMove.nSteps + "," + Utils.DirectionToString(truth.lastMove.direction));
 			} else {
 				System.out.println();
 			}
@@ -150,11 +156,11 @@ public class SimDriver {
 			// display the simulation checks and/or responses
 			if (lastAction == Action.MOVE | lastAction == Action.TURN_OFF) {
 				String trackMoveCheck = "ok";
-				if (state.crashed)
+				if (truth.crashed)
 					trackMoveCheck = "crashed";
 				System.out.println(trackMoveCheck);
 			} else if (lastAction == Action.SCAN) {
-				System.out.println(Utils.ScanToString(state.lastScan));
+				System.out.println(Utils.ScanToString(truth.lastScan));
 			} else {
 				System.out.println("action not recognized");
 			}
@@ -163,12 +169,12 @@ public class SimDriver {
 
     public void renderLawn() {
 
-    	int[] mowerX = new int[states.length];
-    	int[] mowerY = new int[states.length];    	
+    	int[] mowerX = new int[truths.length];
+    	int[] mowerY = new int[truths.length];    	
 
-    	for (int s = 0; s < states.length; s++) {
-    		mowerX[s] = states[s].truthX;
-    		mowerY[s] = states[s].truthY;
+    	for (int s = 0; s < truths.length; s++) {
+    		mowerX[s] = truths[s].truthX;
+    		mowerY[s] = truths[s].truthY;
     	}
     	
     	environ.Render(mowerX, mowerY);
@@ -176,18 +182,18 @@ public class SimDriver {
 		if (verbose) {
 			System.out.println("MOWERS:::::::::::::::::::::::::::::::");
 
-			for (int s = 0; s < states.length; s++) {
+			for (int s = 0; s < truths.length; s++) {
 				mowerX = new int[1];
 				mowerY = new int[1];
-				mowerX[0] = states[s].mower.nav.x;
-				mowerY[0] = states[s].mower.nav.y;
-				states[s].mower.nav.Render(mowerX, mowerY);
+				mowerX[0] = truths[s].mower.nav.x;
+				mowerY[0] = truths[s].mower.nav.y;
+				truths[s].mower.nav.Render(mowerX, mowerY);
 			}
 		}
     	
-    	for (int s = 0; s < states.length; s++) {
+    	for (int s = 0; s < truths.length; s++) {
             // display the mower's direction
-            System.out.println("dir: " + Utils.DirectionToString(states[s].direction));
+            System.out.println("dir: " + Utils.DirectionToString(truths[s].direction));
     	}
 
         System.out.println("");

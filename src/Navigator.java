@@ -14,6 +14,7 @@ public class Navigator extends Environment {
 		
 	}
 	
+	// grow this lawn by one unit to the west. shoulda have used arraylists
 	private void ExpandWest() {
 		Square[][] gridNew = new Square[width+1][height];
 		for (int i = 0; i < height; i++)
@@ -28,6 +29,7 @@ public class Navigator extends Environment {
 		x++;		
 	}
 	
+	// grow this lawn by one unit to the east. shoulda have used arraylists
 	private void ExpandEast() {
 		Square[][] gridNew = new Square[width+1][height];
 		for (int i = 0; i < height; i++)
@@ -41,6 +43,7 @@ public class Navigator extends Environment {
 		width++;	
 	}
 	
+	// grow this lawn by one unit to the south. shoulda have used arraylists
 	private void ExpandSouth() {
 		Square[][] gridNew = new Square[width][height+1];
 		for (int i = 0; i < width; i++)
@@ -55,6 +58,7 @@ public class Navigator extends Environment {
 		y++;
 	}
 	
+	// grow this lawn by one unit to the north. shoulda have used arraylists
 	private void ExpandNorth() {
 		Square[][] gridNew = new Square[width][height+1];
 		for (int i = 0; i < width; i++)
@@ -68,6 +72,8 @@ public class Navigator extends Environment {
 		height++;
 	}
 	
+	// check if one square on the edge of the lawn is known or not a fence, crator, etc
+	// if so, expand the lawn on that edge
 	private void PadBorder() {
 		for (int i = 0; i < height; i++) {
 			Square square = SafeQuery(0, i);
@@ -102,6 +108,9 @@ public class Navigator extends Environment {
 		}
 	}
 	
+	// ingest a scan. if we are at the edge of the lawn, 
+	// expand the lawn to hold the new data
+	// then ingest the data
 	public void IngestScan(Square[] scan) {
 		
 		
@@ -141,6 +150,10 @@ public class Navigator extends Environment {
 		return false;
 	}
 
+	// this is keith's logic here.
+	// its pretty much a breadth first search to the nearst square, 
+	// with a priority in a given direction
+	// check the doc uploaded to slack for this logic. im sure itll change
 	public ArrayList<MyPair> GetNextMoveToFind(Square[] dest, Direction preferedDir) {
 		MyPair current = new MyPair(x, y);
 		ArrayList<MyPair> ret = new ArrayList<MyPair>();

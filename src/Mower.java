@@ -9,6 +9,8 @@ public class Mower {
 	
 	boolean stopped;
 	
+	// TODO update this constructor with 
+	// initial position and a pointer to a shared lawn
 	public Mower(Direction initDirection)
 	{
 		stopped = false;
@@ -17,25 +19,35 @@ public class Mower {
 		direction = initDirection;
 	}
 	
+	// decide what our next action should be
 	public Action GetNextAction()
 	{
+		// if a single square nearby us is unknown, scan. 
 		if (nav.CountNearby(nav.x, nav.y, Square.UNKNOWN) > 0)
 			return Action.SCAN;
+		
+		// if we are at the edge of a lawn, scan.
+		// this should always keep our knowledge in a good state
 		if (nav.x==0 || nav.x == nav.width-1 || nav.y ==0 || nav.y == nav.height-1)
 			return Action.SCAN;
 		
+		// turn off IFF there is no remaining grass
+		// on second look, this logic is probably flawed. 
+		// what if our map hasnt been expanded yet and we have somehow not scanned so as to know our bounds
 		if (nav.CountOccurances(Square.UNCUT) == 0)
 			return Action.TURN_OFF;
 		
+		// we decided to stop (last turn?)
+		// if that didnt take effect, force it to now and just turn off.
 		if (stopped)
 			return Action.TURN_OFF;
 		
+		// guess the only thing left to do is move
 		return Action.MOVE;
 	}
 	
 	public Move DetermineMoveRequest()
-	{
-		
+	{		
 		// FIRST figure out if there are two grasses just sitting in front of us. 
 		boolean nextTwoAreGrass = true;
 
@@ -139,20 +151,25 @@ public class Mower {
 			return dir;
 	}
 
+	// take the last move that we requested, and execute it
 	public void ExecuteRequestedMove() {
-		nav.ApplyMove(nav.x, nav.y, nextMove.nSteps, direction);
+		// update lawn and grass cut
+		nav.ApplyMove(nav.x, nav.y, nextMove.nSteps, direction); 
 		
+		// update perceived mower position and direction
 		nav.x += Utils.GetDirectionDeltaX(direction) * nextMove.nSteps;
 		nav.y += Utils.GetDirectionDeltaY(direction) * nextMove.nSteps;
 		direction = nextMove.direction;
 	}
 	
+	// receive scan. update our own shared lawn
 	public void ReceiveScan(Square[] scan) {
 		
 		nav.IngestScan(scan);
 		
 	}
 	
+	// change our own state to the shutdown state
 	public void Shutdown() {
 		stopped = true;
 	}
