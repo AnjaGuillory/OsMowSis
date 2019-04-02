@@ -1,11 +1,13 @@
 import java.util.HashMap;
 
+//Added New Puppy States and Mower
 enum Square {
-	UNKNOWN, NOTHING, UNCUT, CUT, OBSTACLE, FENCE;
+	UNKNOWN, NOTHING, UNCUT, CUT, OBSTACLE, FENCE, PUPPY_GRASS, PUPPY_EMPTY, PUPPY_MOWER, MOWER;
 }
 
+//Added Stall and Crash
 enum Action {
-	TURN_OFF, MOVE, SCAN;
+	TURN_OFF, MOVE, SCAN, STAY, STALL, CRASH;
 }
 
 enum Direction {
@@ -26,6 +28,8 @@ public class Utils {
 		case SCAN:
 			str = "scan";
 			break;
+		case STAY:
+			str = "stay";
 		default:
 			str = "UNKNOWN ACTION";
 			break;
@@ -101,7 +105,7 @@ public class Utils {
 		return dir;
 	}
 	
-
+    //Added Puppy & Mower States
 	static public String SquareToString(Square square) {
 		String str;
 		switch (square) {
@@ -123,6 +127,14 @@ public class Utils {
 		case FENCE:
 			str = "fence";
 			break;
+		case PUPPY_GRASS:
+			str = "puppy_grass";
+		case PUPPY_EMPTY:
+			str = "puppy_empty";
+		case PUPPY_MOWER:
+			str = "puppy_mower";
+		case MOWER:
+			str = "mower";
 		default:
 			str = "UNKNOWN SQUARE";
 			break;
