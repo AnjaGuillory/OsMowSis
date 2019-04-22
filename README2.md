@@ -4,7 +4,7 @@
 
 ## Getting Started
 ```
-To get started, please install the Windows VM titled team_29.ova.
+To get started, please install the Ubuntu VM titled team_29.ova.
 The VM is currently set to a base memory of 4096 MB and 2 processors, but please adjust to your preference.
 The VM window size may need to be adjusted to fully display the Simulation's GUI.
 ```
